@@ -1,0 +1,181 @@
+<!-- templates/documentation.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shorter.Video.Generator Documentation</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='documentation.css') }}">
+   <style>
+    /* Tabs styling */
+    .tab { overflow: hidden; border-bottom: 1px solid #ccc; background: #f9f9f9; }
+    .tab button { background: inherit; float: left; border: none; outline: none; cursor: pointer;
+      padding: 14px 16px; font-size: 16px; transition: background 0.2s; }
+    .tab button:hover { background: #ececec; }
+    .tab button.active { background: #ddd; }
+    .tabcontent { display: none; padding: 20px; border: 1px solid #ccc; border-top: none; }
+    pre { background: #2d2d2d; color: #f8f8f2; padding: 12px; overflow-x: auto; position: relative; }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{{ url_for('index') }}">Home</a> |
+      <a href="{{ url_for('documentation') }}">Documentation</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Shorter.Video.Generator Documentation</h1>
+    <div class="tab">
+      <button class="tablinks" onclick="openTab(event,'API')" id="defaultOpen">API</button>
+      <button class="tablinks" onclick="openTab(event,'Utility')">Utility</button>
+    </div>
+
+    <!-- API Module -->
+    <div id="API" class="tabcontent">
+      <h2>api/whisper_LLM_api.py</h2>
+      <h3>ensure_directories_exist(*dirs)</h3>
+      <pre><button class="copy-btn" data-target="code1">Copy</button><code id="code1">def ensure_directories_exist(*dirs: str) -> None:
+    """
+    Create directories if they do not exist.
+    :param dirs: one or more directory paths
+    """
+    for path in dirs:
+        os.makedirs(path, exist_ok=True)
+</code></pre>
+      <p><strong>Example:</strong></p>
+      <pre><button class="copy-btn" data-target="code2">Copy</button><code id="code2">ensure_directories_exist('outputs', 'logs/tmp')</code></pre>
+
+      <h3>async def api(video_path, pdf_path, output_dir)</h3>
+      <pre><button class="copy-btn" data-target="code3">Copy</button><code id="code3">async def api(video_path: str,
+              pdf_path: str,
+              output_dir: str) -> Dict[str, Any]:
+    """
+    Main pipeline: convert video to audio, transcribe, generate slides.
+    :param video_path: input MP4 file
+    :param pdf_path: path to PDF script
+    :param output_dir: base output directory
+    :return: dict of results including transcript & slide paths
+    """
+    ensure_directories_exist(output_dir)
+    audio_path = convert_mp4_to_mp3(video_path)
+    transcript = transcribe_audio(audio_path)
+    slides = await gemini_chat(transcript, pdf_path)
+    return {'transcript': transcript, 'slides': slides}</code></pre>
+      <p><strong>Example Usage:</strong></p>
+      <pre><button class="copy-btn" data-target="code4">Copy</button><code id="code4">import asyncio
+results = asyncio.run(api('input.mp4', 'script.pdf', 'results'))
+print(results['transcript'])</code></pre>
+    </div>
+
+    <!-- Utility Modules -->
+    <div id="Utility" class="tabcontent">
+      <h2>utility/api.py</h2>
+      <h3>kokoro_tts_example</h3>
+      <pre><button class="copy-btn" data-target="code5">Copy</button><code id="code5">def kokoro_tts_example(
+    text: str,
+    output_dir: str,
+    filename: str,
+    voice: str = 'en-US-Wavenet-A') -> str:
+    """
+    Generate speech via Kokoro API and save MP3.
+    :return: path to saved file
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, filename)
+    # API call logic...
+    return out_path</code></pre>
+
+      <h3>edge_tts_example</h3>
+      <pre><button class="copy-btn" data-target="code6">Copy</button><code id="code6">async def edge_tts_example(
+    text: str,
+    output_dir: str,
+    filename: str,
+    voice: str = 'zh-CN-YunxiNeural') -> str:
+    """
+    Generate speech via Edge TTS and save MP3 asynchronously.
+    """
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, filename)
+    await EdgeTTS.Communicate(text, voice).save(out_path)
+    return out_path</code></pre>
+
+      <h3>convert_mp4_to_mp3 & transcribe_audio</h3>
+      <pre><button class="copy-btn" data-target="code7">Copy</button><code id="code7">def convert_mp4_to_mp3(
+    video_path: str,
+    bitrate: str = '192k') -> str:
+    """
+    Extract MP3 from MP4 using ffmpeg.
+    :return: path to MP3 file
+    """
+    audio_path = video_path.rsplit('.',1)[0] + '.mp3'
+    subprocess.run(['ffmpeg', '-i', video_path, '-b:a', bitrate, audio_path])
+    return audio_path
+
+
+def transcribe_audio(
+    audio_path: str,
+    model_size: str = 'small') -> str:
+    """
+    Transcribe audio to text using Whisper.
+    :return: transcript string
+    """
+    model = whisper.load_model(model_size)
+    result = model.transcribe(audio_path)
+    return result['text']</code></pre>
+
+      <h3>pdf_to_text_array</h3>
+      <pre><button class="copy-btn" data-target="code8">Copy</button><code id="code8">def pdf_to_text_array(pdf_path: str) -> List[str]:
+    """
+    Read PDF and return list of page texts.
+    """
+    reader = PdfReader(pdf_path)
+    return [page.extract_text() for page in reader.pages]</code></pre>
+
+      <h3>remove_markdown</h3>
+      <pre><button class="copy-btn" data-target="code9">Copy</button><code id="code9">def remove_markdown(text: str) -> str:
+    """
+    Strip Markdown syntax from text.
+    """
+    return re.sub(r'[#*_>`\[\]\(\)]', '', text)</code></pre>
+    </div>
+  </main>
+
+  <script>
+    function openTab(evt, name) {
+      var i, contents = document.getElementsByClassName('tabcontent');
+      for (i = 0; i < contents.length; i++) { contents[i].style.display = 'none'; }
+      var tabs = document.getElementsByClassName('tablinks');
+      for (i = 0; i < tabs.length; i++) { tabs[i].className = tabs[i].className.replace(' active',''); }
+      document.getElementById(name).style.display = 'block';
+      evt.currentTarget.className += ' active';
+    }
+    // Open default
+    document.getElementById('defaultOpen').click();
+
+    // Copy button logic
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.getElementById(btn.getAttribute('data-target'));
+        navigator.clipboard.writeText(target.innerText).then(() => {
+          btn.innerText = 'Copied!';
+          setTimeout(() => btn.innerText = 'Copy', 2000);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

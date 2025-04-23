@@ -270,6 +270,9 @@ def admin_delete_user(token, user_id):
 # ✅ Initialize Database
 with app.app_context():
     db.create_all()
+@app.route("/documentation")
+def documentation():
+    return render_template("documentation.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=False, threaded=True)
