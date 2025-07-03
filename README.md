@@ -60,13 +60,22 @@ python app.py
 
 
 # Expected Result
+<div align="center">
+  
+### Main Interface  
+<img src="https://github.com/user-attachments/assets/28b20487-cdae-4cae-8879-c4ffc7f46ec0" alt="Main Interface" />
 
-| Main Interface | Downloadable Files Interface | Admin Interface for File Management |
-| -------------- | ---------------------------- | ----------------------------------- |
-|![image](https://github.com/user-attachments/assets/28b20487-cdae-4cae-8879-c4ffc7f46ec0)
- |![image](https://github.com/user-attachments/assets/d0803902-53d2-4d21-aec6-7e4636c88567)
- | ![image](https://github.com/user-attachments/assets/b1976b20-aff8-47d8-b6b7-5840c8762aeb)
- |
+---
+
+### Downloadable Files Interface  
+<img src="https://github.com/user-attachments/assets/d0803902-53d2-4d21-aec6-7e4636c88567" alt="Downloadable Files Interface" />
+
+---
+
+### Admin Interface for File Management  
+<img src="https://github.com/user-attachments/assets/b1976b20-aff8-47d8-b6b7-5840c8762aeb" alt="Admin Interface for File Management" />
+
+</div>
 
 ---
 
