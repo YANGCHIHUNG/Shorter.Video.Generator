@@ -55,7 +55,9 @@ async def api(
     output_text_path: str,
     num_of_pages="all",
     resolution: int = 480,  # Default to 480p
-    tts_model: str = 'edge'
+    tts_model: str = 'edge',
+    extra_prompt: str = None,
+    voice : str = None
 ):
     print("\n🚀 Starting the process...\n")
     ensure_directories_exist(output_audio_dir, output_video_dir, os.path.dirname(output_text_path))
@@ -77,7 +79,10 @@ async def api(
         # ✅ Step 2: Transcribe the audio
         print("📝 Transcribing audio to text...")
         script = transcribe_audio(audio, model_size="base")['text']
-
+    if extra_prompt:
+        print(f"📝 Adding extra prompt to script: {extra_prompt}")
+        script += f"\n\n this is the extra prompt instructed by the user: {extra_prompt}"
+    
     # ✅ Step 4: Get API key and process PDF
     keys = eval(os.getenv("api_key"))
     print(f"📄 Extracting text from PDF: {pdf_file_path}")
@@ -111,7 +116,9 @@ async def api(
     for idx, response in enumerate(tqdm(response_array, desc="Processing Audio")):
         filename = f"audio_{idx}.mp3"  # Unique name for each file
         if tts_model == 'edge':
-            tasks.append(edge_tts_example(response, output_audio_dir, filename))  # Save in specified dir
+            if voice is None:
+                voice = "zh-TW-YunJheNeural"
+            tasks.append(edge_tts_example(response, output_audio_dir, filename, voice))  # Save in specified dir
         elif tts_model == 'kokoro':
             tasks.append(kokoro_tts_example(response, output_audio_dir, filename))  # Save in specified dir
             

@@ -1,127 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-         /* Center the entire table and set consistent spacing */
-         table {
-            margin: 0 auto; /* This centers the table horizontally */
-            border-collapse: collapse;
-        }
-        table th,
-        table td {
-            padding: 0.5rem 1rem;
-        }
+{% extends "base.html" %}
 
-        /* Make the Actions column a bit wider and center its content */
-        table th:nth-child(3),
-        table td:nth-child(3) {
-            width: 300px;
-            text-align: center;
-        }
+{% block title %}Admin Dashboard - Video Generator{% endblock %}
 
-        /* Optional: style the table border */
-        table,
-        th,
-        td {
-            border: 1px solid #ccc;
-        }
-    </style>
-</head>
-<body>
-    <!-- ✅ Login / Logout Button -->
-    <div class="nav">
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('logout') }}" class="auth-button">Logout</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="auth-button">Login / Sign Up</a>
-        {% endif %}
-    </div>
-    <h1>Admin Dashboard</h1>
-    <div class="theme-switch">
-        <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()">
-            <span id="theme-icon">🌙</span> <span class="switch-label">Dark/Light Mode Toggle</span>
-        </button>
-    </div>
-    <p>Welcome, Admin!</p>
+{% block content %}
+<div style="text-align: center; margin-bottom: 3rem;">
+    <h1 style="margin-bottom: 1rem;">👑 Admin Dashboard</h1>
+    <p style="font-size: 1.1rem; color: var(--text); opacity: 0.8;">
+        Manage users and system settings
+    </p>
+</div>
+
+<div class="card" style="max-width: 1000px; margin: 0 auto;">
+    <h2 style="text-align: center; margin-bottom: 2rem;">👥 User Management</h2>
     
-    <table border="1" cellspacing="0" cellpadding="5">
-        <thead>
-            <tr>
-                <th>User ID</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-                <tr>
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                        {% if user.email != admin_account %}
-                            <form action="{{ url_for('admin_delete_user', token=token, user_id=user.id) }}" method="post" style="display:inline;">
-                                <button type="submit" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">Delete</button>
-                            </form>
-                        {% else %}
-                            <em>Admin Account</em>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <br>
-    <footer class="footer-container">
-        <p>&copy; 2025 An-Syu Li. All rights reserved.</p>
+    {% if users %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin: 0;">
+                <thead>
+                    <tr style="background: var(--input-bg); border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600;">ID</th>
+                        <th style="padding: 1rem; text-align: left; font-weight: 600;">📧 Email</th>
+                        <th style="padding: 1rem; text-align: center; font-weight: 600;">⚙️ Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.3s ease;" 
+                            onmouseover="this.style.background='var(--input-bg)'" 
+                            onmouseout="this.style.background='transparent'">
+                            <td style="padding: 1rem; font-family: monospace;">{{ user.id }}</td>
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    {% if user.email == admin_account %}
+                                        <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">ADMIN</span>
+                                    {% endif %}
+                                    {{ user.email }}
+                                </div>
+                            </td>
+                            <td style="padding: 1rem; text-align: center;">
+                                {% if user.email != admin_account %}
+                                    <form action="{{ url_for('admin_delete_user', token=token, user_id=user.id) }}" 
+                                          method="post" style="display: inline;">
+                                        <button type="submit" 
+                                                class="btn btn-danger" 
+                                                style="padding: 0.5rem 1rem;"
+                                                onclick="return confirm('⚠️ Are you sure you want to delete this user?\n\nEmail: {{ user.email }}\n\nThis action cannot be undone.')">
+                                            🗑️ Delete
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span style="color: var(--text); opacity: 0.6; font-style: italic;">Protected Account</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         
-        <p class="footer-link">
-            <a href="https://github.com/Louis-Li-dev" target="_blank">
-                <img src="{{ url_for('static', filename='github-mark-white.png') }}" alt="GitHub Logo">
-                Visit my GitHub
-            </a>
-        </p>
-    </footer>
-    
-    <script>
-                // ✅ Dark Mode Toggle Logic
-        function toggleTheme() {
-            let themeIcon = document.getElementById("theme-icon");
-            let themeToggle = document.getElementById("theme-toggle");
-
-            if (document.documentElement.getAttribute("data-theme") === "dark") {
-                document.documentElement.setAttribute("data-theme", "light");
-                themeIcon.textContent = "🌙";  // Change to Moon
-                themeToggle.classList.remove("dark-mode");
-                localStorage.setItem("theme", "light");
-            } else {
-                document.documentElement.setAttribute("data-theme", "dark");
-                themeIcon.textContent = "☀️";  // Change to Sun
-                themeToggle.classList.add("dark-mode");
-                localStorage.setItem("theme", "dark");
-            }
-        }
-    // ✅ Keep User’s Preference After Refresh
-    document.addEventListener("DOMContentLoaded", () => {
-            const savedTheme = localStorage.getItem("theme") || "light";
-            const themeIcon = document.getElementById("theme-icon");
-            const themeToggle = document.getElementById("theme-toggle");
-
-            if (savedTheme === "dark") {
-                document.documentElement.setAttribute("data-theme", "dark");
-                themeIcon.textContent = "☀️"; // Sun for Dark Mode
-                themeToggle.classList.add("dark-mode");
-            } else {
-                document.documentElement.setAttribute("data-theme", "light");
-                themeIcon.textContent = "🌙"; // Moon for Light Mode
-                themeToggle.classList.remove("dark-mode");
-            }
-        });
-
-    </script>
-</body>
-</html>
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color); text-align: center;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; max-width: 600px; margin: 0 auto;">
+                <div style="padding: 1rem; background: var(--input-bg); border-radius: 8px;">
+                    <h4 style="margin: 0 0 0.5rem 0;">👥 Total Users</h4>
+                    <p style="margin: 0; font-size: 1.5rem; font-weight: 600; color: var(--button-bg);">{{ users|length }}</p>
+                </div>
+                <div style="padding: 1rem; background: var(--input-bg); border-radius: 8px;">
+                    <h4 style="margin: 0 0 0.5rem 0;">👑 Admins</h4>
+                    <p style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #28a745;">1</p>
+                </div>
+                <div style="padding: 1rem; background: var(--input-bg); border-radius: 8px;">
+                    <h4 style="margin: 0 0 0.5rem 0;">👤 Regular Users</h4>
+                    <p style="margin: 0; font-size: 1.5rem; font-weight: 600; color: var(--text);">{{ users|length - 1 }}</p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">👥</div>
+            <h3 style="margin-bottom: 1rem;">No Users Found</h3>
+            <p style="opacity: 0.8;">No users are currently registered in the system.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

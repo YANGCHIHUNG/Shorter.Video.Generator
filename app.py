@@ -54,7 +54,7 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
 
 # ✅ Background Processing Task
-def run_processing(video_path, pdf_path, num_of_pages, resolution, user_folder, TTS_model_type):
+def run_processing(video_path, pdf_path, num_of_pages, resolution, user_folder, TTS_model_type, extra_prompt, voice):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
@@ -77,7 +77,9 @@ def run_processing(video_path, pdf_path, num_of_pages, resolution, user_folder, 
             output_text_path=os.path.join(user_folder, "text_output.txt"),
             num_of_pages=num_of_pages,
             resolution=int(resolution),
-            tts_model=TTS_model_type
+            tts_model=TTS_model_type,
+            extra_prompt=extra_prompt,
+            voice=voice
         ))
 
         # ✅ Processing complete, remove status file
@@ -168,6 +170,8 @@ def process_video():
         resolution = request.form.get("resolution")
         num_of_pages = request.form.get('num_of_pages')
         TTS_model_type = request.form.get("TTS_model_type")
+        extra_prompt = request.form.get("extra_prompt")
+        voice = request.form.get("voice")
     if not pdf_file:
         return jsonify({"status": "error", "message": "⚠️ Please upload a PDF file."}), 400
     if video_file and video_file.filename != "":
@@ -179,7 +183,10 @@ def process_video():
     pdf_path = os.path.join(user_folder, secure_filename(pdf_file.filename))
     pdf_file.save(pdf_path)
 
-    processing_thread = threading.Thread(target=run_processing, args=(video_path, pdf_path, num_of_pages, resolution, user_folder, TTS_model_type))
+    processing_thread = threading.Thread(
+        target=run_processing, args=(
+            video_path, pdf_path, num_of_pages, resolution, user_folder, TTS_model_type, extra_prompt, voice
+            ))
     processing_thread.start()
 
     return jsonify({"status": "success", "message": "🚀 Processing started!"}), 200

@@ -1,87 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Sign Up - Video Generator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <!-- ✅ Dark Mode Toggle -->
-    <div class="theme-switch">
-        <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()">
-            <span id="theme-icon">🌙</span> <span class="switch-label">Dark/Light Mode Toggle</span>
-        </button>
-    </div>
+{% block title %}Sign Up - Video Generator{% endblock %}
 
-    <div class="auth-container">
-        <div class="auth-form">
-            <h2>Sign Up</h2>
-
-            <!-- ✅ Flash Messages for Errors -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <p class="flash-{{ category }}">{{ message }}</p>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form method="POST">
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit">Sign Up</button>
-            </form>
-
-            <p>Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto;">
+    <div class="card" style="text-align: center; padding: 3rem 2rem;">
+        <h1 style="margin-bottom: 2rem;">✨ Join Us</h1>
+        
+        <form method="POST" style="padding: 0;">
+            <div style="margin-bottom: 1.5rem; text-align: left;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">📧 Email</label>
+                <input type="email" name="email" required 
+                       style="width: 100%; padding: 0.75rem; border: 2px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--text);"
+                       placeholder="Enter your email">
+            </div>
+            
+            <div style="margin-bottom: 2rem; text-align: left;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">🔒 Password</label>
+                <input type="password" name="password" required 
+                       style="width: 100%; padding: 0.75rem; border: 2px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--text);"
+                       placeholder="Create a password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                🚀 Create Account
+            </button>
+        </form>
+        
+        <div style="padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <p style="margin-bottom: 1rem; opacity: 0.8;">Already have an account?</p>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary" style="width: 100%; padding: 0.75rem;">
+                🔐 Login
+            </a>
         </div>
     </div>
-    <footer class="footer-container">
-        <p>&copy; 2025 An-Syu Li. All rights reserved.</p>
-        
-        <p class="footer-link">
-            <a href="https://github.com/Louis-Li-dev" target="_blank">
-                <img src="{{ url_for('static', filename='github-mark-white.png') }}" alt="GitHub Logo">
-                Visit my GitHub
-            </a>
-        </p>
-    </footer>
-    
-    
-    <script>
-                // ✅ Dark Mode Toggle Logic
-                function toggleTheme() {
-            let themeIcon = document.getElementById("theme-icon");
-            let themeToggle = document.getElementById("theme-toggle");
-
-            if (document.documentElement.getAttribute("data-theme") === "dark") {
-                document.documentElement.setAttribute("data-theme", "light");
-                themeIcon.textContent = "🌙";  // Change to Moon
-                themeToggle.classList.remove("dark-mode");
-                localStorage.setItem("theme", "light");
-            } else {
-                document.documentElement.setAttribute("data-theme", "dark");
-                themeIcon.textContent = "☀️";  // Change to Sun
-                themeToggle.classList.add("dark-mode");
-                localStorage.setItem("theme", "dark");
-            }
-        }
-
-        // ✅ Keep User’s Preference After Refresh
-        document.addEventListener("DOMContentLoaded", () => {
-            const savedTheme = localStorage.getItem("theme") || "light";
-            const themeIcon = document.getElementById("theme-icon");
-            const themeToggle = document.getElementById("theme-toggle");
-
-            if (savedTheme === "dark") {
-                document.documentElement.setAttribute("data-theme", "dark");
-                themeIcon.textContent = "☀️"; // Sun for Dark Mode
-                themeToggle.classList.add("dark-mode");
-            } else {
-                document.documentElement.setAttribute("data-theme", "light");
-                themeIcon.textContent = "🌙"; // Moon for Light Mode
-                themeToggle.classList.remove("dark-mode");
-            }
-        });
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}

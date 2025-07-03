@@ -1,192 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Download Video - Video Generator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        /* Inline styles for download and delete buttons */
-        .download-container {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            border: 1px solid var(--text-color);
-            border-radius: 8px;
-            background-color: var(--section-bg);
-            color: var(--text-color);
-        }
-        .download-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .download-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .download-button {
-            padding: 12px 24px;
-            font-size: 1em;
-            border: none;
-            border-radius: 4px;
-            background-color: var(--primary-color);
-            color: #fff;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 5px;
-        }
-        .download-button:hover {
-            background-color: var(--primary-color-hover);
-        }
-        .delete-button {
-            padding: 8px 16px;
-            font-size: 0.9em;
-            border: none;
-            border-radius: 4px;
-            background-color: #d9534f;
-            color: #fff;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .delete-button:hover {
-            background-color: #c9302c;
-        }
-        .back-link {
-            display: inline-block;
-            margin-top: 30px;
-            font-size: 1em;
-            text-decoration: none;
-            color: var(--primary-color);
-        }
+{% extends "base.html" %}
 
-    </style>
-</head>
-<body>
-    <!-- ✅ Login / Logout Button -->
-    <div class="nav">
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('logout') }}" class="auth-button">Logout</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="auth-button">Login / Sign Up</a>
-        {% endif %}
-    </div>
-    <!-- ✅ Dark Mode Toggle -->
-    <div class="theme-switch">
-        <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()">
-            <span id="theme-icon">🌙</span> <span class="switch-label">Dark/Light Mode Toggle</span>
-        </button>
-    </div>
+{% block title %}Downloads - Video Generator{% endblock %}
 
-    <h1>🎬 Video Generator</h1>
-    <h2>📥 Download Your Processed Videos</h2>
+{% block content %}
+<div style="text-align: center; margin-bottom: 3rem;">
+    <h1 style="margin-bottom: 1rem;">📥 Your Downloads</h1>
+    <p style="font-size: 1.1rem; color: var(--text); opacity: 0.8;">
+        Access and manage your processed videos
+    </p>
+</div>
 
-    <div id="download-container" class="download-container">
-        {% if is_processing %}
-            <p>🚀 Your video is still being processed. Please wait...</p>
-        {% elif files %}
-            <div class="download-buttons">
-                {% for file in files %}
-                    <div class="download-item">
-                        <button class="download-button" onclick="window.location.href='{{ url_for('download_file', filename=file) }}'">
-                            {{ file }}
-                        </button>
-                        
-                        <button class="delete-button" onclick="deleteFile('{{ file }}')">Remove</button>
-                    </div>
-                {% endfor %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    {% if is_processing %}
+        <div style="text-align: center; padding: 3rem;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 30px; height: 30px; border: 3px solid var(--button-bg); border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <h3>🚀 Processing in Progress</h3>
             </div>
-        {% else %}
-            <p>No videos available for download yet.</p>
-        {% endif %}
-    </div>
-    
-
-    <br>
-    <a href="{{ url_for('index') }}" class="back-link">⬅ Back to Home</a>
-    <footer class="footer-container">
-        <p>&copy; 2025 An-Syu Li. All rights reserved.</p>
+            <p style="opacity: 0.8;">Your video is being processed. This page will update automatically.</p>
+        </div>
+    {% elif files %}
+        <h2 style="text-align: center; margin-bottom: 2rem;">Available Files</h2>
         
-        <p class="footer-link">
-            <a href="https://github.com/Louis-Li-dev" target="_blank">
-                <img src="{{ url_for('static', filename='github-mark-white.png') }}" alt="GitHub Logo">
-                Visit my GitHub
+        <div style="display: grid; gap: 1rem;">
+            {% for file in files %}
+                <div style="
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: space-between; 
+                    padding: 1.5rem; 
+                    background: var(--input-bg); 
+                    border: 1px solid var(--border-color); 
+                    border-radius: 8px;
+                    transition: all 0.3s ease;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px var(--shadow)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    
+                    <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                        <div style="
+                            width: 40px; 
+                            height: 40px; 
+                            background: var(--button-bg); 
+                            border-radius: 8px; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            color: white; 
+                            font-size: 1.2rem;
+                        ">
+                            🎬
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; color: var(--text);">{{ file }}</h4>
+                            <small style="color: var(--text); opacity: 0.7;">Video file</small>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button onclick="window.location.href='{{ url_for('download_file', filename=file) }}'" 
+                                class="btn btn-primary" style="padding: 0.5rem 1rem;">
+                            📥 Download
+                        </button>
+                        <button onclick="deleteFile('{{ file }}')" 
+                                class="btn btn-danger" style="padding: 0.5rem 1rem;">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">📁</div>
+            <h3 style="margin-bottom: 1rem;">No Files Yet</h3>
+            <p style="margin-bottom: 2rem; opacity: 0.8;">
+                Upload and process your first video to see downloads here.
+            </p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                🚀 Start Processing
             </a>
-        </p>
-    </footer>
-    
-    
-    <script>
-        function checkProcessingStatus() {
-            fetch("/download")
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById("download-container").innerHTML = new DOMParser()
-                    .parseFromString(html, "text/html")
-                    .getElementById("download-container").innerHTML;
+        </div>
+    {% endif %}
+</div>
+
+{% if files %}
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            ⬅️ Back to Upload
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh for processing status
+    function checkProcessingStatus() {
+        if ({{ 'true' if is_processing else 'false' }}) {
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        }
+    }
+
+    // Delete file function
+    function deleteFile(fileName) {
+        if (confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)) {
+            const deleteBtn = event.target;
+            deleteBtn.disabled = true;
+            deleteBtn.textContent = "Deleting...";
+            
+            fetch("/delete/" + encodeURIComponent(fileName), {
+                method: "DELETE"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // Animate removal
+                    const fileRow = deleteBtn.closest('div[style*="display: flex"]');
+                    fileRow.style.opacity = '0';
+                    fileRow.style.transform = 'translateX(-100%)';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 300);
+                } else {
+                    alert("Error deleting file: " + data.message);
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = "🗑️ Delete";
+                }
+            })
+            .catch(error => {
+                alert("Error: " + error);
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = "🗑️ Delete";
             });
         }
+    }
 
-        // ✅ Dark Mode Toggle Logic
-        function toggleTheme() {
-            let themeIcon = document.getElementById("theme-icon");
-            let themeToggle = document.getElementById("theme-toggle");
-
-            if (document.documentElement.getAttribute("data-theme") === "dark") {
-                document.documentElement.setAttribute("data-theme", "light");
-                themeIcon.textContent = "🌙";  // Change to Moon
-                themeToggle.classList.remove("dark-mode");
-                localStorage.setItem("theme", "light");
-            } else {
-                document.documentElement.setAttribute("data-theme", "dark");
-                themeIcon.textContent = "☀️";  // Change to Sun
-                themeToggle.classList.add("dark-mode");
-                localStorage.setItem("theme", "dark");
-            }
-        }
-
-        // ✅ Keep User’s Preference After Refresh
-        document.addEventListener("DOMContentLoaded", () => {
-            const savedTheme = localStorage.getItem("theme") || "light";
-            const themeIcon = document.getElementById("theme-icon");
-            const themeToggle = document.getElementById("theme-toggle");
-
-            if (savedTheme === "dark") {
-                document.documentElement.setAttribute("data-theme", "dark");
-                themeIcon.textContent = "☀️"; // Sun for Dark Mode
-                themeToggle.classList.add("dark-mode");
-            } else {
-                document.documentElement.setAttribute("data-theme", "light");
-                themeIcon.textContent = "🌙"; // Moon for Light Mode
-                themeToggle.classList.remove("dark-mode");
-            }
-        });
-
-        // ✅ Delete File Logic
-        function deleteFile(fileName) {
-            if (confirm("Are you sure you want to delete " + fileName + "?")) {
-                fetch("/delete/" + encodeURIComponent(fileName), {
-                    method: "DELETE"
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        alert("File deleted successfully!");
-                        location.reload();
-                    } else {
-                        alert("Error deleting file: " + data.message);
-                    }
-                })
-                .catch(error => {
-                    alert("Error: " + error);
-                });
-            }
-        }
-            
-        setInterval(checkProcessingStatus, 5000);
-    </script>
-</body>
-</html>
+    // Initialize
+    document.addEventListener('DOMContentLoaded', checkProcessingStatus);
+</script>
+{% endblock %}
