@@ -63,7 +63,10 @@ python app.py
 
 | Main Interface | Downloadable Files Interface | Admin Interface for File Management |
 | -------------- | ---------------------------- | ----------------------------------- |
-| <img src="https://github.com/user-attachments/assets/f943eb89-2485-473b-b4c0-6d6c09755035" alt="Main Interface" /> | <img src="https://github.com/user-attachments/assets/a2038638-d579-4907-bb4a-1f4c36e1cdac" alt="Downloadable Files Interface" /> | <img src="https://github.com/user-attachments/assets/f6fd6f50-768c-4735-8e39-9e0528fc6445" alt="Admin Interface for File Management"/> |
+|![image](https://github.com/user-attachments/assets/28b20487-cdae-4cae-8879-c4ffc7f46ec0)
+ |![image](https://github.com/user-attachments/assets/d0803902-53d2-4d21-aec6-7e4636c88567)
+ | ![image](https://github.com/user-attachments/assets/b1976b20-aff8-47d8-b6b7-5840c8762aeb)
+ |
 
 ---
 
