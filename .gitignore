@@ -4,3 +4,4 @@ video/
 audio/
 output/*
 *.pyc
+myenv/

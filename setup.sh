@@ -10,6 +10,7 @@ sudo apt update && sudo apt upgrade -y
 
 # Install Git, FFmpeg, Python3, the Python virtual environment module, Pip, and Poppler utilities
 echo "Installing Git, FFmpeg, Python packages, and Poppler..."
+sudo apt install -y pkg-config cmake libpoppler-cpp-dev
 sudo apt install -y git ffmpeg python3 python3-venv python3-pip poppler-utils libpoppler-cpp-dev
 
 # Verify the installations
@@ -24,7 +25,7 @@ echo "Poppler version: $(pdftoppm -v | head -n 1)"
 VENV_DIR="myenv"
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creating a Python virtual environment in '$VENV_DIR'..."
-    python3 -m venv "$VENV_DIR"
+    python3.10 -m venv "$VENV_DIR"
     echo "Virtual environment created successfully."
 else
     echo "Virtual environment '$VENV_DIR' already exists."
