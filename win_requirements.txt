@@ -47,3 +47,6 @@ ipython==8.15.0
 
 # Required for audio processing, provides the soundfile module
 SoundFile==0.12.1
+
+# Web server for Flask applications
+gunicorn
