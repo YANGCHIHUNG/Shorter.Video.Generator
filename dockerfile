@@ -10,4 +10,4 @@ RUN apt-get update && apt-get install -y \
 
 EXPOSE 5001
 
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5001"]
+CMD ["python", "app.py"]
