@@ -30,14 +30,21 @@ async def kokoro_tts_example(text, output_dir, filename, voice="zm_yunyang"):
     # Define the full file path (using .wav for this example)
     output_file_path = os.path.join(output_dir, filename)
     
-    # Initialize the KPipeline with an explicit repo_id to suppress the warning
-    pipeline_instance = KPipeline(lang_code='z', repo_id="hexgrad/Kokoro-82M")
-    
     try:
-        print(f"🔊 Generating speech using voice: {voice}")
+        # Clean the text to remove any problematic characters
+        cleaned_text = text.strip()
+        if len(cleaned_text) > 1000:
+            print(f"⚠️ Warning: Text is very long ({len(cleaned_text)} chars), truncating...")
+            cleaned_text = cleaned_text[:1000] + "..."
+        
+        print(f"🔊 Generating speech using voice: {voice}, Text length: {len(cleaned_text)}")
+        
+        # Initialize the KPipeline with an explicit repo_id to suppress the warning
+        pipeline_instance = KPipeline(lang_code='z', repo_id="hexgrad/Kokoro-82M")
+        
         # Create a generator that yields (graphemes, phonemes, audio)
         generator = pipeline_instance(
-            text, voice=voice, speed=1, split_pattern=r'\n+'
+            cleaned_text, voice=voice, speed=1, split_pattern=r'\n+'
         )
         
         # Merge audio segments (convert Tensors to NumPy arrays if needed)
@@ -54,14 +61,26 @@ async def kokoro_tts_example(text, output_dir, filename, voice="zm_yunyang"):
             # Concatenate the segments along the first dimension
             final_audio = np.concatenate(audio_segments, axis=0)
             sf.write(output_file_path, final_audio, 24000)
-            print(f"💾 Saved TTS audio to: {output_file_path}")
-            return output_file_path
+            
+            # Verify that the file was actually created and has content
+            if os.path.exists(output_file_path):
+                file_size = os.path.getsize(output_file_path)
+                if file_size > 0:
+                    print(f"✅ Successfully saved TTS audio: {output_file_path} ({file_size} bytes)")
+                    return output_file_path
+                else:
+                    print(f"❌ Error: Audio file {output_file_path} is empty (0 bytes)")
+                    return None
+            else:
+                print(f"❌ Error: Audio file {output_file_path} was not created")
+                return None
         else:
-            print("⚠️ No audio was generated.")
+            print("⚠️ No audio segments were generated.")
             return None
 
     except Exception as e:
         print(f"❌ Error generating speech: {e}")
+        print(f"❌ Text that caused error: {text[:100]}...")
         return None
 
 async def edge_tts_example(text, output_dir, filename, voice="zh-CN-YunxiNeural"):
@@ -85,16 +104,40 @@ async def edge_tts_example(text, output_dir, filename, voice="zh-CN-YunxiNeural"
     output_file_path = os.path.join(output_dir, filename)
 
     # ✅ Generate speech and save it to the file
-    communicate = edge_tts.Communicate(text, voice, rate="+20%")
-    
     try:
+        # Clean the text to remove any problematic characters
+        cleaned_text = text.strip()
+        if len(cleaned_text) > 1000:
+            print(f"⚠️ Warning: Text is very long ({len(cleaned_text)} chars), truncating...")
+            cleaned_text = cleaned_text[:1000] + "..."
+        
         print(f"💾 Saving TTS audio to: {output_file_path}")
+        print(f"🔊 Using voice: {voice}, Text length: {len(cleaned_text)}")
+        
+        communicate = edge_tts.Communicate(cleaned_text, voice, rate="+20%")
         await communicate.save(output_file_path)
+        
+        # Add a small delay to ensure file is written
+        import asyncio
+        await asyncio.sleep(0.2)
+        
+        # Verify that the file was actually created and has content
+        if os.path.exists(output_file_path):
+            file_size = os.path.getsize(output_file_path)
+            if file_size > 0:
+                print(f"✅ Successfully saved TTS audio: {output_file_path} ({file_size} bytes)")
+                return output_file_path
+            else:
+                print(f"❌ Error: Audio file {output_file_path} is empty (0 bytes)")
+                return None
+        else:
+            print(f"❌ Error: Audio file {output_file_path} was not created")
+            return None
+            
     except Exception as e:
         print(f"❌ Error saving audio: {e}")
+        print(f"❌ Text that caused error: {text[:100]}...")
         return None
-
-    return output_file_path  # Return the saved file path
 
 
 

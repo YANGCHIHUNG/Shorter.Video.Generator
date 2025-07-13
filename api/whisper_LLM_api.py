@@ -3,6 +3,7 @@ import sys
 import asyncio
 import time
 import logging
+import subprocess
 import nest_asyncio
 from tqdm import tqdm
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
@@ -156,12 +157,40 @@ async def api(
                 tasks.append(edge_tts_example(response, output_audio_dir, filename, voice))
             elif tts_model == 'kokoro':
                 tasks.append(kokoro_tts_example(response, output_audio_dir, filename))
+        
+        # Gather results - fail immediately if any task fails
         audio_files = await asyncio.gather(*tasks)
+        
+        # Strict validation - all audio files must be successfully generated
+        failed_indices = []
         for idx, audio_file in enumerate(audio_files):
             if audio_file is None:
-                logger.error(f"❌ Audio file for segment {idx} was not generated. 請檢查 TTS 服務與參數。")
-                raise RuntimeError("TTS 產生音訊失敗，請檢查 API Key、語音參數或網路連線。")
-        logger.info("✅ All audio responses generated as temporary files!")
+                failed_indices.append(idx)
+                logger.error(f"❌ Audio file for segment {idx} was not generated (returned None).")
+            elif not os.path.exists(audio_file):
+                failed_indices.append(idx)
+                logger.error(f"❌ Audio file for segment {idx} does not exist: {audio_file}")
+            elif os.path.getsize(audio_file) == 0:
+                failed_indices.append(idx)
+                logger.error(f"❌ Audio file for segment {idx} is empty: {audio_file}")
+            else:
+                # Log successful files for debugging
+                file_size = os.path.getsize(audio_file)
+                logger.info(f"✅ Audio file for segment {idx} successfully created: {audio_file} ({file_size} bytes)")
+        
+        # If any audio file failed, stop the entire process
+        if failed_indices:
+            error_msg = f"❌ {len(failed_indices)} out of {len(audio_files)} audio files failed to generate properly. Failed segments: {failed_indices}"
+            logger.error(error_msg)
+            
+            # Log the successful files count for debugging
+            successful_count = len(audio_files) - len(failed_indices)
+            logger.info(f"📊 Summary: {successful_count} successful, {len(failed_indices)} failed out of {len(audio_files)} total")
+            
+            raise RuntimeError(f"TTS 音訊生成失敗。必須所有音檔都成功生成才能繼續製作影片。失敗的段落: {failed_indices}")
+        
+        logger.info(f"✅ All {len(audio_files)} audio files generated successfully!")
+        
     except Exception as e:
         logger.error(f"❌ Error during TTS generation: {e}", exc_info=True)
         raise
@@ -183,9 +212,11 @@ async def api(
     logger.info("🎬 Creating video clips...")
     video_clips = []
     try:
-        for img, audio_file in tqdm(zip(pages, audio_files), total=len(audio_files), desc="Processing Videos"):
+        for idx, (img, audio_file) in enumerate(tqdm(zip(pages, audio_files), total=len(audio_files), desc="Processing Videos")):
             img_resized = img.resize((TARGET_WIDTH, TARGET_HEIGHT), Image.LANCZOS)
             frame = np.array(img_resized)
+            
+            # All audio files are guaranteed to exist at this point
             audioclip = AudioFileClip(audio_file)
             duration = audioclip.duration
             image_clip = ImageClip(frame).set_duration(duration)
